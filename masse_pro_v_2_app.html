@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MassePro V2</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{font-family:Arial;background:#111;color:#fff;margin:0;padding:10px}
+.card{background:#1c1c1c;padding:15px;border-radius:12px;margin-bottom:10px}
+button{padding:10px;border:none;border-radius:8px;background:#c8f55a;font-weight:bold}
+input{padding:10px;border-radius:8px;border:none;width:100%;margin-top:5px}
+</style>
+</head>
+<body>
+
+<h2>MassePro V2</h2>
+
+<div class="card">
+<h3>📊 Suivi du poids</h3>
+<input id="weight" type="number" placeholder="Entrer poids">
+<button onclick="saveWeight()">Enregistrer</button>
+<canvas id="chart"></canvas>
+</div>
+
+<div class="card">
+<h3>🍽️ Repas</h3>
+<button onclick="logMeal(500,30)">Repas OK (+500 kcal)</button>
+<p id="cal">Calories: 0</p>
+<p id="prot">Protéines: 0g</p>
+</div>
+
+<div class="card">
+<h3>💪 Charges</h3>
+<input id="bench" placeholder="Développé couché">
+<button onclick="saveLift()">Sauvegarder</button>
+<p id="benchVal"></p>
+</div>
+
+<script>
+let state = JSON.parse(localStorage.getItem("mpv2")||"{}");
+if(!state.weights) state.weights=[];
+if(!state.kcal) state.kcal=0;
+if(!state.prot) state.prot=0;
+
+function save(){localStorage.setItem("mpv2",JSON.stringify(state));}
+
+function saveWeight(){
+let w=parseFloat(document.getElementById("weight").value);
+state.weights.push({v:w,date:new Date().toLocaleDateString()});
+save();draw();}
+
+function draw(){
+let ctx=document.getElementById("chart");
+new Chart(ctx,{type:"line",data:{labels:state.weights.map(x=>x.date),datasets:[{label:"Poids",data:state.weights.map(x=>x.v)}]}});
+}
+
+draw();
+
+function logMeal(k,p){state.kcal+=k;state.prot+=p;save();update();}
+
+function update(){
+document.getElementById("cal").innerText="Calories: "+state.kcal;
+document.getElementById("prot").innerText="Protéines: "+state.prot+"g";
+}
+update();
+
+function saveLift(){
+let v=document.getElementById("bench").value;
+state.bench=v;save();
+document.getElementById("benchVal").innerText="Dernier: "+v+" kg";
+}
+</script>
+
+</body>
+</html>
